@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "PlanMyTimetable Capture",
+  "description": "Capture timetable data from allocate+ (mytimetable) sites to use on PlanMyTimetable.",
+  "version": "1.0",
+  "background": {
+    "service_worker": "background.js"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["bookmarklet.js"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "48": "images/icon48.png",
+      "96": "images/icon48@2x.png",
+      "128": "images/icon128.png",
+      "256": "images/icon128@2x.png"
+    }
+  },
+  "icons": {
+    "48": "images/icon48.png",
+    "96": "images/icon48@2x.png",
+    "128": "images/icon128.png",
+    "256": "images/icon128@2x.png"
+  },
+  "permissions": ["scripting", "activeTab", "tabs"],
+  "commands": {
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Ctrl+B",
+        "mac": "Command+B"
+      }
+    }
+  }
+}
