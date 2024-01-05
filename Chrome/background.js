@@ -11,10 +11,9 @@ function updateBadge() {
       if (url.startsWith(extensions)) {
         chrome.action.setIcon({
           path: {
+            16: "images/icon.png",
             48: "images/icon48.png",
-            96: "images/icon48@2x.png",
             128: "images/icon128.png",
-            256: "images/icon128@2x.png",
           },
         });
         chrome.action.setBadgeText({
@@ -23,10 +22,9 @@ function updateBadge() {
       } else {
         chrome.action.setIcon({
           path: {
-            48: "images/icon48-deactive.png",
-            96: "images/icon48-deactive@2x.png",
-            128: "images/icon128-deactive.png",
-            256: "images/icon128-deactive@2x.png",
+            16: "images/icon-greyed.png",
+            48: "images/icon-greyed48.png",
+            128: "images/icon-greyed128.png",
           },
         });
         chrome.action.setBadgeText({
