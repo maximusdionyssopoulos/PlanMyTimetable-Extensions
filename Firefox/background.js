@@ -10,8 +10,11 @@ function updateBadge() {
       if (url.startsWith(extensions)) {
         browser.action.setIcon({
           path: {
+            16: "images/icon.svg",
             48: "images/icon.svg",
             96: "images/icon.svg",
+            128: "images/icon.svg",
+            256: "images/icon.svg",
           },
         });
         browser.action.setBadgeText({
@@ -20,8 +23,11 @@ function updateBadge() {
       } else {
         browser.action.setIcon({
           path: {
-            48: "images/icon-deactive.svg",
-            96: "images/icon-deactive.svg",
+            16: "images/icon-greyed.svg",
+            48: "images/icon-greyed.svg",
+            96: "images/icon-greyed.svg",
+            128: "images/icon-greyed.svg",
+            256: "images/icon-greyed.svg",
           },
         });
         browser.action.setBadgeText({

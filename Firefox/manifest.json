@@ -14,13 +14,19 @@
   ],
   "action": {
     "default_icon": {
-      "48": "images/icon-deactive.svg",
-      "96": "images/icon-deactive.svg"
+      "16": "images/icon-greyed.svg",
+      "48": "images/icon-greyed.svg",
+      "96": "images/icon-greyed.svg",
+      "128": "images/icon-greyed.svg",
+      "256": "images/icon-greyed.svg"
     }
   },
   "icons": {
+    "16": "images/icon.svg",
     "48": "images/icon.svg",
-    "96": "images/icon.svg"
+    "96": "images/icon.svg",
+    "128": "images/icon.svg",
+    "256": "images/icon.svg"
   },
   "permissions": ["scripting", "activeTab", "tabs"],
   "commands": {
