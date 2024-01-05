@@ -1,5 +1,6 @@
 browser.tabs.onActivated.addListener(updateBadge);
 browser.tabs.onUpdated.addListener(updateBadge);
+browser.action.setBadgeBackgroundColor({ color: "#4ade80" });
 
 function updateBadge() {
   browser.tabs.query({ active: true, currentWindow: true }, function (tabs) {
