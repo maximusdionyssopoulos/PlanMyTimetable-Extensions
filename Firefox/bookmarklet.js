@@ -18,7 +18,7 @@
     container.style.alignItems = "center";
 
     let loader = document.createElement("div");
-    loader.style.padding = "5%";
+    loader.style.padding = "4%";
     loader.style.display = "flex";
     loader.style.flexDirection = "column";
     loader.style.background = "white";
