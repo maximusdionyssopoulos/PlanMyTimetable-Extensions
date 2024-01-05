@@ -1,4 +1,5 @@
 chrome.tabs.onActivated.addListener(updateBadge);
+chrome.tabs.onUpdated.addListener(updateBadge);
 
 function updateBadge() {
   chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
@@ -7,10 +8,26 @@ function updateBadge() {
       const url = currentTab.url;
       console.log(url);
       if (url.startsWith(extensions)) {
+        chrome.action.setIcon({
+          path: {
+            48: "images/icon48.png",
+            96: "images/icon48@2x.png",
+            128: "images/icon128.png",
+            256: "images/icon128@2x.png",
+          },
+        });
         chrome.action.setBadgeText({
-          text: "GET",
+          text: "+",
         });
       } else {
+        chrome.action.setIcon({
+          path: {
+            48: "images/icon48-deactive.png",
+            96: "images/icon48-deactive@2x.png",
+            128: "images/icon128-deactive.png",
+            256: "images/icon128-deactive@2x.png",
+          },
+        });
         chrome.action.setBadgeText({
           text: "",
         });
