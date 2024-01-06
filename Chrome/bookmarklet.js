@@ -56,7 +56,7 @@
       radio.id = value;
       let label = document.createElement("label");
       let span = document.createElement("span");
-      span.innerHTML = value;
+      span.textContent = value;
       label.appendChild(span);
       form.appendChild(label);
       form.appendChild(radio);

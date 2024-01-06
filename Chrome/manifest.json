@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "PlanMyTimetable Capture",
-  "description": "Capture timetable data from allocate+ (mytimetable) sites to use on PlanMyTimetable.",
+  "description": "Capture timetable data to use on PlanMyTimetable.",
   "version": "1.0",
   "background": {
     "service_worker": "background.js"
