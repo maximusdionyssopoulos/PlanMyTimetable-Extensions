@@ -1,8 +1,14 @@
 {
   "manifest_version": 3,
   "name": "PlanMyTimetable Capture",
-  "description": "Capture timetable data from allocate+ (mytimetable) sites to use on PlanMyTimetable.",
+  "description": "Capture timetable data to use on PlanMyTimetable.",
   "version": "1.0",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "Capture@PlanMyTimetable.org",
+      "strict_min_version": "109.0"
+    }
+  },
   "background": {
     "scripts": ["background.js"]
   },
