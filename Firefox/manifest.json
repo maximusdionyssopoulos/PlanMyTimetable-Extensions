@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PlanMyTimetable Capture",
   "description": "Capture timetable data to use on PlanMyTimetable.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "browser_specific_settings": {
     "gecko": {
       "id": "Capture@PlanMyTimetable.org",

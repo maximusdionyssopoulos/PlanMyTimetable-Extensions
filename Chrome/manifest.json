@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "PlanMyTimetable Capture",
   "description": "Capture timetable data to use on PlanMyTimetable.",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "background": {
     "service_worker": "background.js"
   },
