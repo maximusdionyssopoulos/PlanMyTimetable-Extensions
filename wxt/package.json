@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@webext-core/messaging": "^1.4.0",
+    "jsoncrush": "^1.1.8",
     "lucide-solid": "^0.319.0",
     "solid-js": "^1.8.7"
   },
