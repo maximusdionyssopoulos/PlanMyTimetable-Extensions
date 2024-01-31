@@ -35,9 +35,9 @@ function App() {
     }
   });
 
-  createEffect(() => {
-    console.log(count());
-  });
+  // createEffect(() => {
+  //   console.log(count());
+  // });
 
   onMount(async () => {
     await browser.scripting.executeScript({
@@ -47,28 +47,30 @@ function App() {
   });
 
   return (
-    <>
-      <div class=" w-[14rem] h-[17rem] p-2 overflow-y-hidden dark:bg-neutral-800 dark:text-white">
+    <div class="group">
+      <div class=" w-[14rem] h-[17rem] p-2 dark:bg-neutral-800 dark:text-white space-y-2 overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80">
         <For each={Object.entries(count())}>
           {([semester_name, semester]) => (
             <>
-              <fieldset class="flex flex-row items-center border p-1 px-2 gap-2 rounded-md dark:border-neutral-600">
-                <input
-                  type="checkbox"
-                  name="semester"
-                  value={semester_name}
-                  id={`semester_${semester_name}`}
-                />
-                <label
-                  for={`semester_${semester_name}`}
-                  class=" font-medium text-sm"
-                >
-                  {semester_name}
-                </label>
+              <div class="flex flex-row border p-1 px-2 rounded-md dark:border-neutral-600 justify-between">
+                <fieldset class="flex flex-row items-center gap-2">
+                  <input
+                    type="checkbox"
+                    name="semester"
+                    value={semester_name}
+                    id={`semester_${semester_name}`}
+                  />
+                  <label
+                    for={`semester_${semester_name}`}
+                    class=" font-medium text-sm"
+                  >
+                    {semester_name}
+                  </label>
+                </fieldset>
                 <button onClick={() => toggleVisiblity(semester_name)}>
-                  <ChevronDown class=" size-4 hover:dark:bg-neutral-600 hover:bg-neutral-100 rounded-sm" />
+                  <ChevronDown class=" size-4 " />
                 </button>
-              </fieldset>
+              </div>
               <Show when={semester.visible}>
                 <ClassList semester={semester.semester} />
               </Show>
@@ -79,7 +81,7 @@ function App() {
       <div class="p-2 overflow-y-hidden dark:bg-neutral-700 dark:text-white border-t dark:border-t-neutral-500">
         <h1 class="font-medium text-sm">PlanMyTimetable Capture</h1>
       </div>
-    </>
+    </div>
   );
 }
 

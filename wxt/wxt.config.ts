@@ -16,11 +16,11 @@ export default defineConfig({
   },
   manifest: {
     permissions: ["activeTab"],
-    web_accessible_resources: [
-      {
-        resources: ["load.js", "load_world.js"],
-        matches: ["<all_urls>"],
-      },
-    ],
+    // web_accessible_resources: [
+    //   {
+    //     resources: ["load.js", "load_world.js"],
+    //     matches: ["<all_urls>"],
+    //   },
+    // ],
   },
 });
