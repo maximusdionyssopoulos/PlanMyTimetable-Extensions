@@ -1,15 +1,5 @@
-import { createEffect, createSignal, onMount } from "solid-js";
-// const isolated = () => {
-//   const handleFromWeb = async (event: MessageEvent) => {
-//     if (event.data.from === "msg.js") {
-//       const data = event.data.data;
-//       // browser.runtime.onConnect.addListener(async () => {
-//       await browser.runtime.sendMessage(data);
-//       // });
-//     }
-//   };
-//   window.addEventListener("message", handleFromWeb);
-// };
+import { createEffect, createSignal, onMount, For } from "solid-js";
+import { ChevronDown, ChevronUp } from "lucide-solid";
 
 type ActivityGroup = {
   subject_code: string;
@@ -46,7 +36,7 @@ type Subject = {
 
 type Semester = Record<string, Subject>;
 
-type CourseStructure = Record<string, Semester>;
+type CourseStructure = Record<string, { semester: Semester; visible: boolean }>;
 
 function App() {
   const [count, setCount] = createSignal<CourseStructure>({});
@@ -59,8 +49,25 @@ function App() {
     return tab;
   };
 
+  const toggleVisiblity = (semester_name: string) => {
+    const course = count();
+    setCount(() => ({
+      ...course,
+      [semester_name]: {
+        ...course[semester_name],
+        visible: !course[semester_name].visible,
+      },
+    }));
+  };
+
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    setCount(message);
+    if (sender.id === browser.runtime.id) {
+      const course = Object.entries(message).map(([name, item]) => [
+        name,
+        { semester: item, visible: true },
+      ]);
+      setCount(Object.fromEntries(course));
+    }
   });
 
   createEffect(() => {
@@ -77,7 +84,7 @@ function App() {
   return (
     <>
       <div class=" w-[14rem] h-[17rem] p-2 overflow-y-hidden dark:bg-neutral-800 dark:text-white">
-        {Object.entries(count()).map(([semester_name, semester]) => (
+        {Object.entries(count()).map(([semester_name, item]) => (
           <>
             <fieldset class="flex flex-row items-center border p-1 px-2 gap-2 rounded-md dark:border-neutral-600">
               <input
@@ -92,8 +99,12 @@ function App() {
               >
                 {semester_name}
               </label>
+              <button onClick={() => toggleVisiblity(semester_name)}>
+                <ChevronDown class=" size-4 hover:dark:bg-neutral-600 hover:bg-neutral-100 rounded-sm" />
+              </button>
             </fieldset>
-            <ClassList semester={semester} open={false} />
+
+            <ClassList semester={item.semester} />
           </>
         ))}
       </div>
@@ -106,18 +117,15 @@ function App() {
 
 interface classListProps {
   semester: Semester;
-  open: boolean;
 }
-function ClassList({ semester, open }: classListProps) {
-  return open ? (
-    <ul>
-      {Object.values(semester).map((class_item) => (
-        <li class="text-xs">
-          {class_item.description} - {class_item.callista_code}
-        </li>
-      ))}
-    </ul>
-  ) : null;
-}
+const ClassList = ({ semester }: classListProps) => (
+  <ul>
+    {Object.values(semester).map((class_item) => (
+      <li class="text-xs">
+        {class_item.description} - {class_item.callista_code}
+      </li>
+    ))}
+  </ul>
+);
 
 export default App;
