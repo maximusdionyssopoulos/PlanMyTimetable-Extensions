@@ -85,6 +85,7 @@ function App() {
           return 4;
       }
     };
+
     const data = await Promise.all(
       classes.map(async (course, index) => {
         return Promise.all(
@@ -92,10 +93,10 @@ function App() {
             console.log(
               `Downloading group ${course.description} - ${group.activity_group_code}`
             );
-            const url = new URL(window.location.href);
+            const url = new URL(window.wrappedJSObject.location.href);
             const token = url.searchParams.get("ss");
 
-            const path_base = window.location.pathname
+            const path_base = window.wrappedJSObject.location.pathname
               .split("/")
               .slice(0, -1)
               .join("/");
@@ -103,7 +104,7 @@ function App() {
             // create url to fetch data from
             const fetchUrl = new URL(
               `${url.origin}${path_base}/rest/student/${
-                window.data.student.student_code
+                window.wrappedJSObject.data.student.student_code
               }/subject/${course.subject_code}/group/${
                 group.activity_group_code
               }/activities/?${"ss"}=${token}`
@@ -147,10 +148,11 @@ function App() {
       })
     );
     console.log(data);
-    window.postMessage({
-      from: "s.js",
-      data: data,
-    });
+
+    // window.postMessage({
+    //   from: "s.js",
+    //   data: data,
+    // });
   };
 
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -213,7 +215,6 @@ function App() {
           await browser.scripting.executeScript({
             target: { tabId: (await getCurrentTab()).id ?? 0 },
             func: capture,
-            world: "MAIN",
             args: [classes()],
           });
         }}

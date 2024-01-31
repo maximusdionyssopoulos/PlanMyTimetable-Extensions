@@ -3,21 +3,8 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* for FIREFOX */
-  /* .scrollbar {
+  .scrollbar {
     scrollbar-width: thin;
     scrollbar-track-color: transparent;
-  } */
-  .scrollbar::-webkit-scrollbar {
-    @apply p-10 w-[6px] h-1 block;
-  }
-  .scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-neutral-500/0 rounded-full;
-  }
-  .scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-neutral-500/80 rounded-full;
-  }
-  .scrollbar::-webkit-scrollbar-thumb:active {
-    @apply bg-neutral-500/80 rounded-full;
   }
 }
