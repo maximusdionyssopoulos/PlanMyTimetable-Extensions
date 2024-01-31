@@ -5,6 +5,7 @@ type CourseStructure = Record<string, { semester: Semester; visible: boolean }>;
 
 function App() {
   const [count, setCount] = createSignal<CourseStructure>({});
+  const [classes, setClasses] = createSignal<Subject[]>([]);
 
   const getCurrentTab = async () => {
     const [tab] = await browser.tabs.query({
@@ -25,13 +26,141 @@ function App() {
     }));
   };
 
+  /**
+   * This function runs inside the "world" of the page, meaning it has access to variables
+   * this fetches data, creates objects before returning them
+   */
+  const capture = async (classes: Subject[]) => {
+    /** 
+     * NanoID - Copyright 2017 Andrey Sitnik - MIT License
+        The MIT License (MIT)
+
+        Copyright 2017 Andrey Sitnik <andrey@sitnik.ru>
+
+        Permission is hereby granted, free of charge, to any person obtaining a copy of
+        this software and associated documentation files (the "Software"), to deal in
+        the Software without restriction, including without limitation the rights to
+        use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+        the Software, and to permit persons to whom the Software is furnished to do so,
+        subject to the following conditions:
+
+        The above copyright notice and this permission notice shall be included in all
+        copies or substantial portions of the Software.
+
+        THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+        IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+        FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+        COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+        IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+        CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+     */
+    const nanoid = (t = 21) =>
+      crypto
+        .getRandomValues(new Uint8Array(t))
+        .reduce(
+          (t, e) =>
+            (t +=
+              (e &= 63) < 36
+                ? e.toString(36)
+                : e < 62
+                ? (e - 26).toString(36).toUpperCase()
+                : e > 62
+                ? "-"
+                : "_"),
+          ""
+        );
+    const selectType = (type: string) => {
+      switch (type) {
+        case "Lecture":
+          return 0;
+        case "Lectorial":
+          return 0;
+        case "Tutorial":
+          return 1;
+        case "Workshop":
+          return 2;
+        case "Practical":
+          return 3;
+        default:
+          return 4;
+      }
+    };
+    const data = await Promise.all(
+      classes.map(async (course, index) => {
+        return Promise.all(
+          Object.values(course.groups).map(async (group) => {
+            console.log(
+              `Downloading group ${course.description} - ${group.activity_group_code}`
+            );
+            const url = new URL(window.location.href);
+            const token = url.searchParams.get("ss");
+
+            const path_base = window.location.pathname
+              .split("/")
+              .slice(0, -1)
+              .join("/");
+
+            // create url to fetch data from
+            const fetchUrl = new URL(
+              `${url.origin}${path_base}/rest/student/${
+                window.data.student.student_code
+              }/subject/${course.subject_code}/group/${
+                group.activity_group_code
+              }/activities/?${"ss"}=${token}`
+            );
+
+            // fetch individual class data
+            const request = await fetch(fetchUrl);
+
+            if (request.status === 200) {
+              let data = await request.json();
+              // create object for class
+              const classs = {
+                id: nanoid(),
+                title: course.description,
+                courseCode: course.callista_code ?? course.subject_code,
+                type: selectType((Object.values(data) as any)[0].activityType),
+                colour: index,
+                options: Object.values(data).map((item: any) => {
+                  const option: any = {
+                    day: item.day_of_week,
+                    start: item.start_time,
+                    duration: item.duration,
+                    location: item.location,
+                    campus_description: item.campus_description,
+                    grouped: false,
+                    grouped_code: "",
+                  };
+                  if (item.activity_code.match(/\d{2}-P[1-9]/g)) {
+                    option.grouped = true;
+                    option.grouped_code = item.activity_code;
+                  }
+                  return option;
+                }),
+              };
+              return classs;
+            } else {
+              throw "Problem retreiving data. Please refresh the page and try again. If the problem persists, please open a new issue on Github.";
+            }
+          })
+        );
+      })
+    );
+    console.log(data);
+    window.postMessage({
+      from: "s.js",
+      data: data,
+    });
+  };
+
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (sender.id === browser.runtime.id) {
       const course = Object.entries(message).map(([name, item]) => [
         name,
-        { semester: item, visible: true },
+        { semester: item, visible: false },
       ]);
       setCount(Object.fromEntries(course));
+      setClasses(Object.values(message["HE Sem 01"]) as Subject[]);
     }
   });
 
@@ -47,8 +176,8 @@ function App() {
   });
 
   return (
-    <div class="group">
-      <div class=" w-[14rem] h-[17rem] p-2 dark:bg-neutral-800 dark:text-white space-y-2 overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80">
+    <div class="group dark:bg-neutral-800 dark:text-white w-[14rem] flex flex-col  ">
+      <div class="space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80">
         <For each={Object.entries(count())}>
           {([semester_name, semester]) => (
             <>
@@ -78,6 +207,19 @@ function App() {
           )}
         </For>
       </div>
+      <button
+        class="w-24 m-0.5 place-self-center min-h-7  bg-yellow-400 text-yellow-800 px-2 rounded-md hover:bg-yellow-500"
+        onClick={async () => {
+          await browser.scripting.executeScript({
+            target: { tabId: (await getCurrentTab()).id ?? 0 },
+            func: capture,
+            world: "MAIN",
+            args: [classes()],
+          });
+        }}
+      >
+        Capture
+      </button>
       <div class="p-2 overflow-y-hidden dark:bg-neutral-700 dark:text-white border-t dark:border-t-neutral-500">
         <h1 class="font-medium text-sm">PlanMyTimetable Capture</h1>
       </div>
@@ -89,7 +231,7 @@ interface classListProps {
   semester: Semester;
 }
 const ClassList = ({ semester }: classListProps) => (
-  <ul>
+  <ul class="list-disc list-inside px-2">
     {Object.values(semester).map((class_item) => (
       <li class="text-xs">
         {class_item.description} - {class_item.callista_code}
