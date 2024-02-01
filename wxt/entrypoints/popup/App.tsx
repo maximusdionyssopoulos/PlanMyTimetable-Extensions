@@ -1,4 +1,12 @@
-import { createEffect, createSignal, onMount, For, Show } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  onMount,
+  For,
+  Show,
+  type Accessor,
+  type Setter,
+} from "solid-js";
 import { ChevronDown, ChevronUp } from "lucide-solid";
 
 type CourseStructure = Record<string, { semester: Semester; visible: boolean }>;
@@ -103,6 +111,7 @@ function App() {
             // create url to fetch data from
             const fetchUrl = new URL(
               `${url.origin}${path_base}/rest/student/${
+                // @ts-ignore
                 window.data.student.student_code
               }/subject/${course.subject_code}/group/${
                 group.activity_group_code
@@ -153,6 +162,14 @@ function App() {
     });
     // TODO: get message and jsonCRUSH data, before opening a new window with data see lines #190 to #196 of bookmarklet
   };
+  /**
+   * This method is to check whether a semester is selected by checing whether every element in semester is in classes
+   * @param semester
+   * @returns
+   */
+  const isSemSelected = (semester: Semester) => {
+    return Object.values(semester).every((item) => classes().includes(item));
+  };
 
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (sender.id === browser.runtime.id) {
@@ -161,11 +178,16 @@ function App() {
         { semester: item as Semester, visible: index === 0 },
       ]);
       setCount(Object.fromEntries(course));
+
+      if (typeof course[0][1] === "object") {
+        setClasses(Object.values(course[0][1].semester));
+      }
     }
   });
 
   // createEffect(() => {
-  //   console.log(count());
+  // console.log(count());
+  // console.log(classes());
   // });
 
   onMount(async () => {
@@ -176,7 +198,7 @@ function App() {
   });
 
   return (
-    <div class="group dark:bg-neutral-800 dark:text-white w-[14rem] flex flex-col  ">
+    <div class="group dark:bg-neutral-800 dark:text-white w-[14rem] flex flex-col ">
       <div class="space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80 ">
         <For each={Object.entries(count())}>
           {([semester_name, semester]) => (
@@ -196,10 +218,15 @@ function App() {
                   name="semester"
                   value={semester_name}
                   id={`semester_${semester_name}`}
+                  checked={isSemSelected(semester.semester)}
                 />
               </div>
               <Show when={semester.visible}>
-                <ClassList semester={semester.semester} />
+                <ClassList
+                  semester={semester.semester}
+                  classes={classes}
+                  setClasses={setClasses}
+                />
               </Show>
             </div>
           )}
@@ -211,6 +238,7 @@ function App() {
           await browser.scripting.executeScript({
             target: { tabId: (await getCurrentTab()).id ?? 0 },
             func: capture,
+            // @ts-ignore
             world: "MAIN",
             args: [classes()],
           });
@@ -224,18 +252,44 @@ function App() {
 
 interface classListProps {
   semester: Semester;
+  classes: Accessor<Subject[]>;
+  setClasses: Setter<Subject[]>;
 }
-const ClassList = ({ semester }: classListProps) => (
-  <ul class="list-disc list-inside px-2">
-    <For each={Object.values(semester)}>
-      {(item) => (
-        <li class="text-xs">
-          {item.description} - {item.callista_code}
-        </li>
-      )}
-    </For>
-  </ul>
-);
+const ClassList = ({ semester, classes, setClasses }: classListProps) => {
+  /**
+   * method to remove and add item from classes array
+   * if already in array find index and remove
+   * else add it to classes array
+   * @param item - the item to remove/add
+   */
+  const handleClassesUpdate = (item: Subject) => {
+    if (classes().includes(item)) {
+      const index = classes().findIndex((value) => value === item);
+      setClasses(classes().toSpliced(index, 1));
+    } else {
+      setClasses([...classes(), item]);
+    }
+  };
+  return (
+    <ul class=" list-none list-inside px-2">
+      <For each={Object.values(semester)}>
+        {(item) => (
+          <li class="text-xs inline-flex gap-2">
+            <input
+              type="checkbox"
+              name="semester"
+              value={item.callista_code}
+              id={`class_${item.callista_code}`}
+              checked={classes().includes(item)}
+              onChange={() => handleClassesUpdate(item)}
+            />
+            {item.description} ({item.callista_code})
+          </li>
+        )}
+      </For>
+    </ul>
+  );
+};
 
 type ActivityGroup = {
   subject_code: string;
