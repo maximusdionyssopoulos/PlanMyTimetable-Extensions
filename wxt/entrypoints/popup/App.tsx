@@ -6,7 +6,7 @@ import {
   type Accessor,
   type Setter,
 } from "solid-js";
-import { ChevronDown, ChevronUp } from "lucide-solid";
+import { ChevronDown, ChevronUp, AlertTriangleIcon } from "lucide-solid";
 import JSONCrush from "jsoncrush";
 
 type CourseStructure = Record<string, { semester: Semester; visible: boolean }>;
@@ -226,6 +226,29 @@ function App() {
           Capturing your timetable data...
         </div>
       </Show>
+      <Show when={captureState() === "ERROR"}>
+        <div class="flex flex-col items-center justify-center w-full z-10 h-[17rem] absolute text-sm text-center font-medium px-2 bg-white dark:bg-neutral-800 gap-1">
+          <div class=" rounded-3xl  p-4 dark:border-neutral-600 border">
+            <AlertTriangleIcon class=" size-8 stroke-red-600 dark:stroke-red-400" />
+          </div>
+          <h1 class="text-base font-medium">Uh oh, something went wrong</h1>
+          <div class="space-y-2">
+            <p class="text-sm">
+              Please check your internet connection, refresh the page and try
+              again.
+            </p>
+            <p class="text-xs">
+              If the problem persists, please open a new issue&nbsp;
+              <a
+                href="https://github.com/s3943811/timetable/issues/new"
+                class="font-medium underline underline-offset-4 after:content-['_↗']"
+              >
+                on Github
+              </a>
+            </p>
+          </div>
+        </div>
+      </Show>
       <div
         class={`space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80 ${
           captureState() === "CAPTURING" ? "opacity-5" : ""
@@ -282,6 +305,12 @@ function App() {
             world: "MAIN",
             args: [classes()],
           });
+
+          if (!result) {
+            setCaptureState("ERROR");
+            return;
+          }
+
           /**
            * This data will be returned from the capture function, we then encoded and open a new window
            */
