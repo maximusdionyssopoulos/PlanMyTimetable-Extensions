@@ -134,14 +134,12 @@ function App() {
         );
       })
     );
-    window.postMessage(
-      {
-        from: "PlanMyTimetableCapture_",
-        next: "REDIRECT",
-        data: data.flat(),
-      },
-      "*"
-    );
+    return data.flat();
+  };
+
+  const getStudentData = () => {
+    // @ts-ignore
+    return window.data.student.student_enrolment_sem;
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -195,40 +193,31 @@ function App() {
   };
 
   //////////////////////////////////////////////////////////////////////////////////////////////////
-  browser.runtime.onMessage.addListener((message, sender) => {
-    if (sender.id === browser.runtime.id) {
-      /**
-       * next CAPTURE refers to the next step, so we set the classes and
-       */
-      if (message.next === "CAPTURE") {
-        const course = Object.entries(message.data).map(
-          ([name, item], index) => [
-            name,
-            { semester: item as Semester, visible: index === 0 },
-          ]
-        );
-        setCourse(Object.fromEntries(course));
-
-        if (typeof course[0][1] === "object") {
-          setClasses(Object.values(course[0][1].semester));
-        }
-        setCaptureState("IDLE");
-      } else if (message.next === "REDIRECT") {
-        const encoded = encodeURIComponent(
-          JSONCrush.crush(JSON.stringify(message.data))
-        );
-        window
-          .open(`https://planmytimetable.vercel.app/?state=${encoded}`)
-          ?.focus();
-      }
-    }
-  });
 
   onMount(async () => {
-    await browser.scripting.executeScript({
+    const [{ result }] = await browser.scripting.executeScript({
       target: { tabId: (await getCurrentTab()).id ?? 0 },
-      files: ["/load_world.js"],
+      func: getStudentData,
+      // @ts-ignore
+      world: "MAIN",
     });
+    console.log(result);
+
+    /**
+     * This is the data returned from the script, it is the student data...
+     * as a result we can set our course and default classes
+     */
+
+    const course = Object.entries(result).map(([name, item], index) => [
+      name,
+      { semester: item as Semester, visible: index === 0 },
+    ]);
+    setCourse(Object.fromEntries(course));
+
+    if (typeof course[0][1] === "object") {
+      setClasses(Object.values(course[0][1].semester));
+    }
+    setCaptureState("IDLE");
   });
 
   return (
@@ -287,13 +276,22 @@ function App() {
         disabled={captureState() === "CAPTURING"}
         onClick={async () => {
           setCaptureState("CAPTURING");
-          await browser.scripting.executeScript({
+          const [{ result }] = await browser.scripting.executeScript({
             target: { tabId: (await getCurrentTab()).id ?? 0 },
             func: capture,
             // @ts-ignore
             world: "MAIN",
             args: [classes()],
           });
+          /**
+           * This data will be returned from the capture function, we then encoded and open a new window
+           */
+          const encoded = encodeURIComponent(
+            JSONCrush.crush(JSON.stringify(result))
+          );
+          window
+            .open(`https://planmytimetable.vercel.app/?state=${encoded}`)
+            ?.focus();
         }}
       >
         Capture
