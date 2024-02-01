@@ -1,13 +1,10 @@
 import {
-  createEffect,
   createSignal,
   onMount,
   For,
   Show,
   type Accessor,
   type Setter,
-  Switch,
-  Match,
 } from "solid-js";
 import { ChevronDown, ChevronUp } from "lucide-solid";
 import JSONCrush from "jsoncrush";
@@ -226,11 +223,6 @@ function App() {
       }
     }
   });
-
-  // createEffect(() => {
-  // console.log(count());
-  // console.log(classes());
-  // });
 
   onMount(async () => {
     await browser.scripting.executeScript({
