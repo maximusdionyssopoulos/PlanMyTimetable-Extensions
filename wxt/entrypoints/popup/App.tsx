@@ -6,34 +6,16 @@ import {
   Show,
   type Accessor,
   type Setter,
+  Switch,
+  Match,
 } from "solid-js";
 import { ChevronDown, ChevronUp } from "lucide-solid";
+import JSONCrush from "jsoncrush";
 
 type CourseStructure = Record<string, { semester: Semester; visible: boolean }>;
-
+type CaptureState = "IDLE" | "CAPTURING" | "ERROR" | "LOADING";
 function App() {
-  const [count, setCount] = createSignal<CourseStructure>({});
-  const [classes, setClasses] = createSignal<Subject[]>([]);
-
-  const getCurrentTab = async () => {
-    const [tab] = await browser.tabs.query({
-      active: true,
-      lastFocusedWindow: true,
-    });
-    return tab;
-  };
-
-  const toggleVisiblity = (semester_name: string) => {
-    const course = count();
-    setCount(() => ({
-      ...course,
-      [semester_name]: {
-        ...course[semester_name],
-        visible: !course[semester_name].visible,
-      },
-    }));
-  };
-
+  //////////////////////////////////////////////////////////////////////////////////////////////////
   /**
    * This function runs inside the "world" of the page, meaning it has access to variables
    * this fetches data, creates objects before returning them
@@ -155,12 +137,37 @@ function App() {
         );
       })
     );
-    console.log(data);
-    window.postMessage({
-      from: "s.js",
-      data: data,
+    window.postMessage(
+      {
+        from: "PlanMyTimetableCapture_",
+        next: "REDIRECT",
+        data: data.flat(),
+      },
+      "*"
+    );
+  };
+
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  const [course, setCourse] = createSignal<CourseStructure>({});
+  const [classes, setClasses] = createSignal<Subject[]>([]);
+  const [captureState, setCaptureState] = createSignal<CaptureState>("LOADING");
+
+  const getCurrentTab = async () => {
+    const [tab] = await browser.tabs.query({
+      active: true,
+      lastFocusedWindow: true,
     });
-    // TODO: get message and jsonCRUSH data, before opening a new window with data see lines #190 to #196 of bookmarklet
+    return tab;
+  };
+
+  const toggleVisiblity = (semester_name: string) => {
+    setCourse((course) => ({
+      ...course,
+      [semester_name]: {
+        ...course[semester_name],
+        visible: !course[semester_name].visible,
+      },
+    }));
   };
   /**
    * This method is to check whether a semester is selected by checing whether every element in semester is in classes
@@ -190,16 +197,32 @@ function App() {
     }
   };
 
-  browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  //////////////////////////////////////////////////////////////////////////////////////////////////
+  browser.runtime.onMessage.addListener((message, sender) => {
     if (sender.id === browser.runtime.id) {
-      const course = Object.entries(message).map(([name, item], index) => [
-        name,
-        { semester: item as Semester, visible: index === 0 },
-      ]);
-      setCount(Object.fromEntries(course));
+      /**
+       * next CAPTURE refers to the next step, so we set the classes and
+       */
+      if (message.next === "CAPTURE") {
+        const course = Object.entries(message.data).map(
+          ([name, item], index) => [
+            name,
+            { semester: item as Semester, visible: index === 0 },
+          ]
+        );
+        setCourse(Object.fromEntries(course));
 
-      if (typeof course[0][1] === "object") {
-        setClasses(Object.values(course[0][1].semester));
+        if (typeof course[0][1] === "object") {
+          setClasses(Object.values(course[0][1].semester));
+        }
+        setCaptureState("IDLE");
+      } else if (message.next === "REDIRECT") {
+        const encoded = encodeURIComponent(
+          JSONCrush.crush(JSON.stringify(message.data))
+        );
+        window
+          .open(`https://planmytimetable.vercel.app/?state=${encoded}`)
+          ?.focus();
       }
     }
   });
@@ -218,8 +241,17 @@ function App() {
 
   return (
     <div class="group dark:bg-neutral-800 dark:text-white w-[14rem] flex flex-col ">
-      <div class="space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80 ">
-        <For each={Object.entries(count())}>
+      <Show when={captureState() === "CAPTURING"}>
+        <div class="flex items-center justify-center w-full z-10 h-[17rem] absolute text-sm text-center font-medium px-2">
+          Capturing your timetable data...
+        </div>
+      </Show>
+      <div
+        class={`space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80 ${
+          captureState() === "CAPTURING" ? "opacity-5" : ""
+        }`}
+      >
+        <For each={Object.entries(course())}>
           {([semester_name, semester]) => (
             <div class="border-b last:border-b-0 dark:border-neutral-600 pb-2">
               <div class="flex flex-row  p-1 px-2 justify-between ">
@@ -258,8 +290,11 @@ function App() {
         </For>
       </div>
       <button
-        class="w-24 m-0.5 place-self-center min-h-7  bg-yellow-400 text-yellow-800 px-2 rounded-md hover:bg-yellow-500"
+        class="w-24 m-0.5 place-self-center min-h-7  bg-yellow-400 text-yellow-800 px-2 rounded-md hover:bg-yellow-500 disabled:opacity-50 disabled:cursor-not-allowed
+        "
+        disabled={captureState() === "CAPTURING"}
         onClick={async () => {
+          setCaptureState("CAPTURING");
           await browser.scripting.executeScript({
             target: { tabId: (await getCurrentTab()).id ?? 0 },
             func: capture,
