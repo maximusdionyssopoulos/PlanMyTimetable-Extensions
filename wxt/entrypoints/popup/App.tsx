@@ -201,7 +201,6 @@ function App() {
       // @ts-ignore
       world: "MAIN",
     });
-    console.log(result);
 
     /**
      * This is the data returned from the script, it is the student data...

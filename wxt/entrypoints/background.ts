@@ -1,8 +1,45 @@
 export default defineBackground(() => {
-  console.log("Hello background!", { id: browser.runtime.id });
-  // browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  //   console.log(sender);
+  const extensions = "https://mytimetable";
 
-  //   console.log(message);
-  // });
+  browser.action.setBadgeBackgroundColor({ color: "#4ade80" });
+
+  async function updateBadgeAndIcon() {
+    const tabs = await browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    });
+    const currTab = tabs[0];
+    if (currTab.url?.startsWith(extensions)) {
+      Promise.all([
+        await browser.action.enable(),
+        await browser.action.setIcon({
+          path: {
+            16: "icon@16.png",
+            48: "icon@48.png",
+            128: "icon@128.png",
+          },
+        }),
+        await browser.action.setBadgeText({
+          text: "+",
+        }),
+      ]);
+    } else {
+      Promise.all([
+        await browser.action.disable(),
+        await browser.action.setIcon({
+          path: {
+            16: "icon-greyed.png",
+            48: "icon-greyed48.png",
+            128: "icon-greyed128.png",
+          },
+        }),
+        await browser.action.setBadgeText({
+          text: "",
+        }),
+      ]);
+    }
+  }
+
+  browser.tabs.onActivated.addListener(updateBadgeAndIcon);
+  browser.tabs.onUpdated.addListener(updateBadgeAndIcon);
 });
