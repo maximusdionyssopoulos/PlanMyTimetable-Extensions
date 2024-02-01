@@ -16,7 +16,6 @@ export default defineConfig({
   },
   manifest: {
     permissions: ["activeTab"],
-    // remove if building for firefox
     web_accessible_resources: [
       {
         resources: ["load.js", "load_world.js"],

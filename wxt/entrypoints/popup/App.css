@@ -3,11 +3,6 @@
 @tailwind utilities;
 
 @layer utilities {
-  /* for FIREFOX */
-  /* .scrollbar {
-    scrollbar-width: thin;
-    scrollbar-track-color: transparent;
-  } */
   .scrollbar::-webkit-scrollbar {
     @apply p-10 w-[6px] h-1 block;
   }

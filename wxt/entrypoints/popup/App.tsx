@@ -151,16 +151,16 @@ function App() {
       from: "s.js",
       data: data,
     });
+    // TODO: get message and jsonCRUSH data, before opening a new window with data see lines #190 to #196 of bookmarklet
   };
 
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (sender.id === browser.runtime.id) {
-      const course = Object.entries(message).map(([name, item]) => [
+      const course = Object.entries(message).map(([name, item], index) => [
         name,
-        { semester: item, visible: false },
+        { semester: item as Semester, visible: index === 0 },
       ]);
       setCount(Object.fromEntries(course));
-      setClasses(Object.values(message["HE Sem 01"]) as Subject[]);
     }
   });
 
@@ -177,33 +177,31 @@ function App() {
 
   return (
     <div class="group dark:bg-neutral-800 dark:text-white w-[14rem] flex flex-col  ">
-      <div class="space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80">
+      <div class="space-y-2 p-2 h-[17rem] overflow-y-scroll scrollbar group-hover:[&::-webkit-scrollbar-thumb]:bg-neutral-500/80 ">
         <For each={Object.entries(count())}>
           {([semester_name, semester]) => (
-            <>
-              <div class="flex flex-row border p-1 px-2 rounded-md dark:border-neutral-600 justify-between">
-                <fieldset class="flex flex-row items-center gap-2">
-                  <input
-                    type="checkbox"
-                    name="semester"
-                    value={semester_name}
-                    id={`semester_${semester_name}`}
-                  />
-                  <label
-                    for={`semester_${semester_name}`}
-                    class=" font-medium text-sm"
+            <div class="border-b last:border-b-0 dark:border-neutral-600 pb-2">
+              <div class="flex flex-row  p-1 px-2 justify-between ">
+                <div class="flex flex-row items-center gap-2">
+                  <button
+                    class="inline-flex gap-1 items-center font-medium text-sm"
+                    onClick={() => toggleVisiblity(semester_name)}
                   >
+                    <ChevronDown class=" size-4" />
                     {semester_name}
-                  </label>
-                </fieldset>
-                <button onClick={() => toggleVisiblity(semester_name)}>
-                  <ChevronDown class=" size-4 " />
-                </button>
+                  </button>
+                </div>
+                <input
+                  type="checkbox"
+                  name="semester"
+                  value={semester_name}
+                  id={`semester_${semester_name}`}
+                />
               </div>
               <Show when={semester.visible}>
                 <ClassList semester={semester.semester} />
               </Show>
-            </>
+            </div>
           )}
         </For>
       </div>
@@ -220,9 +218,6 @@ function App() {
       >
         Capture
       </button>
-      <div class="p-2 overflow-y-hidden dark:bg-neutral-700 dark:text-white border-t dark:border-t-neutral-500">
-        <h1 class="font-medium text-sm">PlanMyTimetable Capture</h1>
-      </div>
     </div>
   );
 }
@@ -232,11 +227,13 @@ interface classListProps {
 }
 const ClassList = ({ semester }: classListProps) => (
   <ul class="list-disc list-inside px-2">
-    {Object.values(semester).map((class_item) => (
-      <li class="text-xs">
-        {class_item.description} - {class_item.callista_code}
-      </li>
-    ))}
+    <For each={Object.values(semester)}>
+      {(item) => (
+        <li class="text-xs">
+          {item.description} - {item.callista_code}
+        </li>
+      )}
+    </For>
   </ul>
 );
 
