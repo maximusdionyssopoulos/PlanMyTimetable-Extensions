@@ -2,9 +2,10 @@ export default defineUnlistedScript({
   main() {
     window.postMessage(
       {
-        from: "msg.js",
+        from: "PlanMyTimetableCapture_",
+        next: "CAPTURE",
+        // @ts-ignore
         data: window.data.student.student_enrolment_sem,
-        // data: "test",
       },
       "*"
     );

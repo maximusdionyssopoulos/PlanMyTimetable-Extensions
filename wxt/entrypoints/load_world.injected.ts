@@ -1,11 +1,9 @@
 export default defineUnlistedScript({
   main() {
-    let data;
     const script = document.createElement("script");
     const handleFromWeb = async (event: MessageEvent) => {
-      if (event.data.from === "msg.js") {
-        data = event.data.data;
-        browser.runtime.sendMessage(data);
+      if (event.data.from === "PlanMyTimetableCapture_") {
+        browser.runtime.sendMessage(event.data);
         script.remove();
       }
     };
