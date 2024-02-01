@@ -171,6 +171,25 @@ function App() {
     return Object.values(semester).every((item) => classes().includes(item));
   };
 
+  /**
+   * This function will update the classes array when the semester checkbox is ticked/unticked
+   * if the semester is already selected, then remove the classes from that semester when unchecking
+   * else if the semester isn't selected then add the classes in that semester
+   * we use a set to ensure that the classes array only has unique values
+   * @param semester
+   */
+  const handleSemesterChange = (semester: Semester) => {
+    if (isSemSelected(semester)) {
+      setClasses((classes) =>
+        classes.filter((item) => !Object.values(semester).includes(item))
+      );
+    } else {
+      setClasses((classes) => [
+        ...new Set([...classes, ...Object.values(semester)]),
+      ]);
+    }
+  };
+
   browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (sender.id === browser.runtime.id) {
       const course = Object.entries(message).map(([name, item], index) => [
@@ -209,7 +228,12 @@ function App() {
                     class="inline-flex gap-1 items-center font-medium text-sm"
                     onClick={() => toggleVisiblity(semester_name)}
                   >
-                    <ChevronDown class=" size-4" />
+                    <Show
+                      when={semester.visible}
+                      fallback={<ChevronUp class=" size-4" />}
+                    >
+                      <ChevronDown class=" size-4" />
+                    </Show>
                     {semester_name}
                   </button>
                 </div>
@@ -219,6 +243,7 @@ function App() {
                   value={semester_name}
                   id={`semester_${semester_name}`}
                   checked={isSemSelected(semester.semester)}
+                  onChange={() => handleSemesterChange(semester.semester)}
                 />
               </div>
               <Show when={semester.visible}>
@@ -265,9 +290,9 @@ const ClassList = ({ semester, classes, setClasses }: classListProps) => {
   const handleClassesUpdate = (item: Subject) => {
     if (classes().includes(item)) {
       const index = classes().findIndex((value) => value === item);
-      setClasses(classes().toSpliced(index, 1));
+      setClasses((classes) => classes.toSpliced(index, 1));
     } else {
-      setClasses([...classes(), item]);
+      setClasses((classes) => [...classes, item]);
     }
   };
   return (
