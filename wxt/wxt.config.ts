@@ -15,12 +15,21 @@ export default defineConfig({
       "/Users/maximusdionyss/Library/Application Support/Google/Chrome/Default",
   },
   manifest: {
-    permissions: ["activeTab"],
+    name: "PlanMyTimetable Capture",
+    description: "Capture timetable data to use on PlanMyTimetable.",
+    permissions: ["activeTab", "scripting", "tabs"],
     web_accessible_resources: [
       {
         resources: ["load.js", "load_world.js"],
         matches: ["<all_urls>"],
       },
     ],
+    action: {
+      default_icon: {
+        "16": "icon-greyed.png",
+        "48": "icon-greyed48.png",
+        "128": "icon-greyed128.png",
+      },
+    },
   },
 });
