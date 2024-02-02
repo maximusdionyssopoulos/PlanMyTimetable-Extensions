@@ -30,7 +30,7 @@ All operations occur on-device with no data ever sent to a server.
 
 ## Development
 
-I used the [wxt framework](https://wxt.dev/) to create the browser extensions.
+I used the [wxt framework](https://wxt.dev/) to create the browser extensions. For the popup, I used Solid JS due to its small bundle size and performant features. 
 
 ### Why are there different Firefox and Chrome extensions
 
