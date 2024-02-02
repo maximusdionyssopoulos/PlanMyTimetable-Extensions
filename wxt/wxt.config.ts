@@ -9,21 +9,10 @@ export default defineConfig({
     },
     plugins: [Solid()],
   }),
-  runner: {
-    disabled: true,
-    chromiumProfile:
-      "/Users/maximusdionyss/Library/Application Support/Google/Chrome/Default",
-  },
   manifest: {
     name: "PlanMyTimetable Capture",
     description: "Capture timetable data to use on PlanMyTimetable.",
     permissions: ["activeTab", "scripting", "tabs"],
-    web_accessible_resources: [
-      {
-        resources: ["load.js", "load_world.js"],
-        matches: ["<all_urls>"],
-      },
-    ],
     action: {
       default_icon: {
         "16": "icon-greyed.png",
