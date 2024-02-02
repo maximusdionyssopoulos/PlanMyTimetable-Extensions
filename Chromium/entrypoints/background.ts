@@ -11,29 +11,29 @@ export default defineBackground(() => {
     const currTab = tabs[0];
     if (currTab.url?.startsWith(extensions)) {
       Promise.all([
-        await browser.action.enable(),
-        await browser.action.setIcon({
+        browser.action.enable(),
+        browser.action.setIcon({
           path: {
             16: "icon@16.png",
             48: "icon@48.png",
             128: "icon@128.png",
           },
         }),
-        await browser.action.setBadgeText({
+        browser.action.setBadgeText({
           text: "+",
         }),
       ]);
     } else {
       Promise.all([
-        await browser.action.disable(),
-        await browser.action.setIcon({
+        browser.action.disable(),
+        browser.action.setIcon({
           path: {
             16: "icon-greyed.png",
             48: "icon-greyed48.png",
             128: "icon-greyed128.png",
           },
         }),
-        await browser.action.setBadgeText({
+        browser.action.setBadgeText({
           text: "",
         }),
       ]);
@@ -43,4 +43,6 @@ export default defineBackground(() => {
   browser.tabs.onActivated.addListener(updateBadgeAndIcon);
   browser.tabs.onUpdated.addListener(updateBadgeAndIcon);
   browser.runtime.onInstalled.addListener(updateBadgeAndIcon);
+  browser.windows.onCreated.addListener(updateBadgeAndIcon);
+  browser.windows.onFocusChanged.addListener(updateBadgeAndIcon);
 });
