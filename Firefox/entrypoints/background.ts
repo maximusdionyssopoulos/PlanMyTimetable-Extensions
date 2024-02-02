@@ -46,4 +46,5 @@ export default defineBackground(() => {
 
   browser.tabs.onActivated.addListener(updateBadgeAndIcon);
   browser.tabs.onUpdated.addListener(updateBadgeAndIcon);
+  browser.runtime.onInstalled.addListener(updateBadgeAndIcon);
 });
