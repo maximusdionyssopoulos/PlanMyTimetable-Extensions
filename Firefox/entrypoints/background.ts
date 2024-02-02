@@ -8,11 +8,12 @@ export default defineBackground(() => {
       active: true,
       currentWindow: true,
     });
+    console.log(tabs);
     const currTab = tabs[0];
     if (currTab.url?.startsWith(extensions)) {
       Promise.all([
-        await browser.browserAction.enable(),
-        await browser.browserAction.setIcon({
+        browser.browserAction.enable(),
+        browser.browserAction.setIcon({
           path: {
             16: "icon.svg",
             48: "icon.svg",
@@ -21,14 +22,14 @@ export default defineBackground(() => {
             256: "icon.svg",
           },
         }),
-        await browser.browserAction.setBadgeText({
+        browser.browserAction.setBadgeText({
           text: "+",
         }),
       ]);
     } else {
       Promise.all([
-        await browser.browserAction.disable(),
-        await browser.browserAction.setIcon({
+        browser.browserAction.disable(),
+        browser.browserAction.setIcon({
           path: {
             16: "icon-greyed.svg",
             48: "icon-greyed.svg",
@@ -37,7 +38,7 @@ export default defineBackground(() => {
             256: "icon-greyed.svg",
           },
         }),
-        await browser.browserAction.setBadgeText({
+        browser.browserAction.setBadgeText({
           text: "",
         }),
       ]);
@@ -47,4 +48,6 @@ export default defineBackground(() => {
   browser.tabs.onActivated.addListener(updateBadgeAndIcon);
   browser.tabs.onUpdated.addListener(updateBadgeAndIcon);
   browser.runtime.onInstalled.addListener(updateBadgeAndIcon);
+  browser.windows.onCreated.addListener(updateBadgeAndIcon);
+  browser.windows.onFocusChanged.addListener(updateBadgeAndIcon);
 });
