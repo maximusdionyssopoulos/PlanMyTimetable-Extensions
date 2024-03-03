@@ -8,7 +8,7 @@ export default defineBackground(() => {
       active: true,
       currentWindow: true,
     });
-    console.log(tabs);
+
     const currTab = tabs[0];
     if (currTab.url?.startsWith(extensions)) {
       Promise.all([

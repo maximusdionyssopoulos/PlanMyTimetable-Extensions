@@ -8,3 +8,7 @@
     scrollbar-track-color: transparent;
   }
 }
+
+html {
+  color-scheme: dark light;
+}
