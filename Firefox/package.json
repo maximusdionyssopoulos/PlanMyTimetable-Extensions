@@ -2,7 +2,7 @@
   "name": "plan-my-timetable-capture",
   "description": "Capture timetable data to use on PlanMyTimetable.",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "type": "module",
   "scripts": {
     "dev": "wxt",
@@ -15,7 +15,6 @@
     "postinstall": "wxt prepare"
   },
   "dependencies": {
-    "@webext-core/messaging": "^1.4.0",
     "jsoncrush": "^1.1.8",
     "lucide-solid": "^0.319.0",
     "solid-js": "^1.8.7"
