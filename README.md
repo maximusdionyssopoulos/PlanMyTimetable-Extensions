@@ -1,6 +1,6 @@
 # PlanMyTimetable Capture
 
-The browser extensions for the [PlanMyTimetable](https://github.com/s3943811/PlanMyTimetabl), [web app](https://planmytimetable.vercel.app).
+The browser extensions for the [PlanMyTimetable](https://github.com/s3943811/PlanMyTimetable), [web app](https://planmytimetable.vercel.app).
 
 ## Features
 
