@@ -35,3 +35,8 @@ I used the [wxt framework](https://wxt.dev/) to create the browser extensions. F
 ### Why are there different Firefox and Chrome extensions
 
 - As Firefox doesn't support running scripts in the "MAIN" world and instead has other methods to achieve the same goal, different code must be run. Whilst, this can be done at runtime with the wxt framework, having seperate code bases allows me to use SVGs on Firefox (not supported on Chromium), and different CSS for the scrollbars (Firefox doesn't support ::-webkit-scrollbar).
+
+
+## Credits
+
+- Tom Anderson ([andogq](https://github.com/andogq)) - Modified the bookmark code available [here](https://github.com/andogq/timetable), to select semester, use nanoid and JSONCrush, and redirect to this site.
